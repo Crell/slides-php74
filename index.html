@@ -186,16 +186,56 @@
         <p class="oversize"><q>So when should I use it?</q></p>
         <p class="fragment oversize">Pretty much always</p>
       </section>
-
     </section>
-
-
+    <section>
       <section>
-        <pre><code class="php" data-trim data-noescape data-line-numbers>
-
+        <h1>#2</h1>
+      </section>
+      <section>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $username = $username ? $username : 'Anonymous';
+        </code></pre>
+        <pre class="fragment" style="margin-top: 1em;"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $username = $username ?: 'Anonymous';
+        </code></pre>
+        <p class="fragment bigtext">But what if $username doesn't exist?</p>
+        <pre class="fragment" style="margin-top: 1em;"><code class="text font--24" data-trim data-noescape>
+          Notice: Undefined variable: username on line 3
         </code></pre>
       </section>
+      <section>
+        <div class="layout-stacked" style="height: 700px">
+          <div>
+            <p>Fugly...</p>
+            <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+              $username = isset($username) && !is_null($username) ? $username : 'Anonymous';
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <p>NULL coalesce! (PHP 7.0)</p>
+            <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+              $username = $username ?? $user->username() ?? 'Anonymous';
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <p>NULL coalesce assign! (PHP 7.4)</p>
+            <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+              $username ??= $user->username() ?? 'Anonymous';
+            </code></pre>
+          </div>
+          <p class="fragment bigtext">?? and ??= check setness, not truthiness</p>
+        </div>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <ul class="fragment">
+          <li class="oversize">Default values object/array parameters</li>
+          <li class="oversize">Anywhere it makes the code prettier</li>
+        </ul>
+      </section>
     </section>
+
+
 
 
 
