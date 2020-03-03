@@ -192,10 +192,10 @@
         <h1>#2</h1>
       </section>
       <section>
-        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+        <pre><code class="php font--24" data-trim data-noescape>
           $username = $username ? $username : 'Anonymous';
         </code></pre>
-        <pre class="fragment" style="margin-top: 1em;"><code class="php font--24" data-trim data-noescape data-line-numbers>
+        <pre class="fragment" style="margin-top: 1em;"><code class="php font--24" data-trim data-noescape>
           $username = $username ?: 'Anonymous';
         </code></pre>
         <p class="fragment bigtext">But what if $username doesn't exist?</p>
@@ -207,19 +207,19 @@
         <div class="layout-stacked" style="height: 700px">
           <div>
             <p>Fugly...</p>
-            <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+            <pre><code class="php font--18" data-trim data-noescape>
               $username = isset($username) && !is_null($username) ? $username : 'Anonymous';
             </code></pre>
           </div>
           <div class="fragment">
             <p>NULL coalesce! (PHP 7.0)</p>
-            <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+            <pre><code class="php font--20" data-trim data-noescape>
               $username = $username ?? $user->username() ?? 'Anonymous';
             </code></pre>
           </div>
           <div class="fragment">
             <p>NULL coalesce assign! (PHP 7.4)</p>
-            <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+            <pre><code class="php font--20" data-trim data-noescape>
               $username ??= $user->username() ?? 'Anonymous';
             </code></pre>
           </div>
@@ -234,8 +234,88 @@
         </ul>
       </section>
     </section>
+    <section>
+      <section>
+        <h1>#3</h1>
+      </section>
+      <section>
+        <h3>How do you combine arrays?</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $a1 = [1, 2, 3];
+          $a2 = [4, 5, 6];
+        </code></pre>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $b = $a1 + $a2; // Maybe?
+          var_dump($b);
+        </code></pre>
+        <p class="fragment">Wrong!  Only for all-associative arrays.</p>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape>
+          array(3) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            int(3)
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>array addition only assigns on unmatched key</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 600px">
+          <div>
+            <h3>Fugly</h3>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $a1 = [1, 2, 3];
+              $a2 = [4, 5, 6];
 
+              $b = array_merge($a1, $a2);  // Eew.
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <h3>Spread!</h3>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $a1 = [1, 2, 3];
+              $a2 = [4, 5, 6];
 
+              $b = [...$a1, ...$a2];
+            </code></pre>
+          </div>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Reads as "enumerate all the values in the array"</li>
+            <li>Only works for indexed arrays!</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <h3>Spread 'em all</h3>
+          <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          function afunc(string $b, User ...$users) : callable
+          {
+              $params = [$a, $b, ...$users];
+              anotherFunc(...$params);
+          }
+        </code></pre>
+          <ul class="fragment">
+            <li class="oversize">... in function def: Replaces func_get_args()</li>
+            <li>... in function call: Replaces call_user_func_array()</li>
+            <li>... in array: Replaces array_merge()</li>
+          </ul>
+          <p class="fragment oversize">... That's amazing!</p>
+        </div>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <p class="fragment oversize">Anytime you would have used array_merge()</p>
+      </section>
+    </section>
 
 
 
