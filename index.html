@@ -49,6 +49,154 @@
       </div>
     </section>
 
+    <section>
+      <section>
+        <h1>#1</h1>
+      </section>
+      <section>
+        <h2>Anonymous structs are very bad</h2>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $order = [
+              'id' => 345,
+              'total' => 100.45,
+              'skus' => [ 123, '5B3', '987'],
+              'canceled' => false,
+              'usr' => 8,
+          ];
+        </code></pre>
+        <ul style="margin-top: 1em;">
+          <li class="fragment">Is canceled spelled right?</li>
+          <li class="fragment">Is usr correct or a typo?</li>
+          <li class="fragment">Is user an ID or User object?</li>
+          <li class="fragment">Are skus numeric or strings?</li>
+          <li class="fragment">Can skus be a single value?</li>
+          <li class="fragment">Are there other properties?</li>
+          <li class="fragment">What currency is total in?</li>
+        </ul>
+      </section>
+      <section>
+        <h3>Named structs are better</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+        class Order {
+            public $id;
+            public $total;
+            public $cancelled = false;
+            public $user;
+            public $skus = [];
+        }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Know legal values</li>
+            <li>UK spelling of "cancelled".</li>
+            <li>Not 100% better, but 80%.</li>
+            <li>Is $user ID or object?</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Typed named structs are best</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+        class Order {
+            public string $id;
+            public Money $total;
+            public bool $cancelled = false;
+            public User $user;
+            public array $skus = [];
+        }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Oh, ID is a string, not an integer.</li>
+            <li>Oh, user is an object. We were wrong before.</li>
+            <li>Oh, money is a proper value object, too.</li>
+            <li>Could use a list object for $skus.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Typed Properties</h3>
+        <ul>
+          <li class="fragment">Any valid type except callable/void</li>
+          <li class="fragment">Enforced on "set"</li>
+          <li class="fragment">Can be nullable: <code>private ?User $user;</code></li>
+          <li class="fragment">Obeys strict/weak typing mode</li>
+          <li class="fragment">Cannot change in inheritance</li>
+          <li class="fragment">All you "self-documenting" people, take note</li>
+        </ul>
+        <aside class="notes">
+          <ul>
+            <li>void doesn't make sense</li>
+            <li>Callable has odd scoping issues</li>
+            <li>Enforcement on set has very slight perf impact (likely not noticeable)</li>
+            <li>Covariant and contravariant (read and write), so cannot change on inheritance</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Defaults are logical</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          class Test {
+              // Legal default values
+              public bool     $a = true;
+              public int      $b = 42;
+              public float    $c = 42.42;
+              public string   $e = "str";
+              public array    $f = [1, 2, 3];
+              public iterable $g = [1, 2, 3];
+              public ?int     $h = null;
+              public ?Test    $j = null;
+
+              // These have *no* legal default values
+              // so "uninitialized"
+              public object   $k;
+              public Test     $l;
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Can only be set to null if nullable.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>"Uninitialized" behavior</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          class Product {
+            public string $size;
+          }
+
+          $p = new Product();
+
+          print ($p->size);
+          // Throws TypeError:
+          // Typed property Product::$size must not be accessed
+          // before initialization
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Not the same as null</li>
+            <li>Set initial values in definition, or constructor</li>
+            <li>If legit could be empty, make it nullable</li>
+            <li>If could be empty, question your data model. (Null is a code smell)</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <p class="fragment oversize">Pretty much always</p>
+      </section>
+
+    </section>
+
+
+      <section>
+        <pre><code class="php" data-trim data-noescape data-line-numbers>
+
+        </code></pre>
+      </section>
+    </section>
+
 
 
     <div style="display: none">
