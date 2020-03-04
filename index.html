@@ -316,6 +316,167 @@
         <p class="fragment oversize">Anytime you would have used array_merge()</p>
       </section>
     </section>
+    <section>
+      <section>
+        <h1>#4</h1>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <div>
+            <p>Think fast, what number is this?</p>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $num = 10000000000000;
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <p>How about this?</p>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $num = 10_000_000_000_000;
+            </code></pre>
+          </div>
+          <p class="fragment oversize">Compile identically</p>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>10 trillion</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Any numeric value</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          6.674_083e-11; // float
+          299_792_458;   // integer
+          0xCAFE_F00D;   // hexadecimal
+          0b0101_1111;   // binary
+          0137_041;      // octal
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Between any two digits</li>
+            <li>For readability only</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <ul class="fragment oversize">
+          <li>Big number constants</li>
+          <li>Binary literals</li>
+          <li>Hex address literals</li>
+        </ul>
+      </section>
+    </section>
+    <section>
+      <section>
+        <h1>#5</h1>
+      </section>
+      <section>
+        <h2>Full method<br />covariance and contravariance</h2>
+      </section>
+      <section>
+        <img src="assets/confused-cat-whut.jpg" alt="Whut?" class="meme" />
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 500px">
+          <dl>
+            <dt>Covariance</dt>
+            <dd>Preserves ordering of types from <em>more specific to more generic</em></dd>
+            <dt>Contravariance</dt>
+            <dd>Preserves ordering of types from <em>more general to more specific</em></dd>
+          </dl>
+          <p class="fragment oversize">"Subclasses work in inheritance now"</p>
+        </div>
+      </section>
+      <section>
+        <h3>PHP < 7.2</h3>
+        <p>Cannot vary method signature at all</p>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          class User {}
+          class Admin extends User {}
+
+          class Product {}
+          class TShirt extends Product {}
+
+          class FavoriteFinder {
+              public function stuff(Admin $user): Product {}
+          }
+
+          class UserFavorite extends FavoriteFinder {
+              public function stuff(Admin $user): Product {}
+          }
+        </code></pre>
+      </section>
+      <section>
+        <h3>PHP 7.2</h3>
+        <p>Can <em>add</em> return types and <em>remove</em> param types</p>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          class User {}
+          class Admin extends User {}
+
+          class Product {}
+          class TShirt extends Product {}
+
+          class FavoriteFinder {
+              public function stuff(Admin $user) {}
+          }
+
+          class UserFavorite extends FavoriteFinder {
+              public function stuff($user): TShirt {}
+          }
+        </code></pre>
+      </section>
+      <section>
+        <h3>PHP 7.4</h3>
+        <p>Super-types for params, subtypes for returns</p>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          class User {}
+          class Admin extends User {}
+
+          class Product {}
+          class TShirt extends Product {}
+
+          class FavoriteFinder {
+              public function stuff(Admin $user): Product {}
+          }
+
+          class UserFavorite extends FavoriteFinder {
+              public function stuff(User $user): TShirt {}
+          }
+        </code></pre>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <div>
+            <h3><code>return self</code> now works!</h3>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              interface AList {
+                  public function add($item): self;
+              }
+
+              class SpecialList implements AList {
+                  public function add($item): self {}
+              }
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <p>PHP < 7.4</p>
+            <code>Fatal error: Declaration of SpecialList::add($item): SpecialList must be compatible with AList::add($item): AList</code>
+          </div>
+          <p class="oversize fragment">(But wait, <code>return static</code> is coming in PHP 8...)</p>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Especially nice for fluent interfaces, evolvable value objects</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <p class="fragment oversize">Any time you want!</p>
+      </section>
+    </section>
+
 
 
 
@@ -326,6 +487,7 @@
       * Array spread
       * Numeric literal separator: 1_000_000
       * Covariant return/contravariant params (return self doesn't suck now)
+
       * Weakrefs
       * Yet another serialization mechanism
       * Short closures
