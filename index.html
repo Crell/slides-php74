@@ -375,7 +375,7 @@
         <h2>Full method<br />covariance and contravariance</h2>
       </section>
       <section>
-        <img src="assets/confused-cat-whut.jpg" alt="Whut?" class="meme" />
+        <img src="assets/confused-cat-whut.jpg" alt="Whut?" class="meme" data-credit="http://astrorhysy.blogspot.com/2011/04/ive-got-me-house.html" />
       </section>
       <section>
         <div class="layout-stacked" style="height: 500px">
@@ -473,10 +473,182 @@
       </section>
       <section>
         <p class="oversize"><q>So when should I use it?</q></p>
-        <p class="fragment oversize">Any time you want!</p>
+        <p class="fragment oversize">Any time you want (especially value objects)!</p>
       </section>
     </section>
+    <section>
+      <section>
+        <h1>#6</h1>
+        <aside class="notes">
+          <ul>
+            <li>Let's talk about serialization...</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <img src="assets/cereal.jpg" alt="Bowl of cereal" data-credit="https://www.flickr.com/photos/vandinglewop/8060703503/" />
+      </section>
+      <section>
+        <h3><code>__sleep</code>/<code>__wakeup</code> (The before times)</h3>
+        <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+          class User {
+              protected int $id;
+              protected string $name;
+              protected DateTime $lastLogin;
 
+              // ...
+
+              public function __sleep() {
+                  return ['id', 'name'];
+              }
+
+              public function __wakeup() {
+                  $this->lastLogin = UserSystem::getLastLogin($this->id);
+              }
+          }
+        </code></pre>
+        <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+          $s = serialize(new User());
+          print_r($s);
+
+          // O:4:"User":2:{s:5:"*id";i:42;s:7:"*name";s:5:"Larry";}
+        </code></pre>
+      </section>
+      <section>
+        <h3><code>__sleep</code>/<code>__wakeup</code></h3>
+        <div class="layout-col">
+          <div>
+            <h3>Done well</h3>
+            <ul>
+              <li class="fragment">Inheritance works properly</li>
+              <li class="fragment">Object references retained</li>
+              <li class="fragment">Let's the serializer engine do the hard work</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="fragment">Problems</h3>
+            <ul>
+              <li class="fragment">Can only serialize existing properties</li>
+              <li class="fragment">Cannot control deserialization</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h3><code>Serializable</code> (PHP 5.1)</h3>
+        <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+          class User implements Serializable {
+              protected int $id;
+              protected string $name;
+              protected DateTime $lastLogin;
+
+              public function serialize() : string {
+                  return serialize(['id' => $this->id, 'name' => $this->name]);
+              }
+
+              public function unserialize($serialized) : void {
+                  $data = unserialize($serialized);
+                  $this->id = $data['id'];
+                  $this->name = $data['name'];
+                  $this->lastLogin = UserSystem::getLastLogin($this->id);
+              }
+          }
+        </code></pre>
+        <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+          $s = serialize(new User());
+          print_r($s);
+
+          // C:4:"User":43:{a:2:{s:2:"id";i:42;s:4:"name";s:5:"Larry";}}
+        </code></pre>
+      </section>
+      <section>
+        <div class="layout-col">
+          <div>
+            <h3>Done well</h3>
+            <ul>
+              <li class="fragment">More flexibility in representation</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="fragment">Problems</h3>
+            <ul>
+              <li class="fragment">Breaks on circular references</li>
+              <li class="fragment">Breaks on inheritance (sometimes)</li>
+              <li class="fragment">Opaque serialized value</li>
+              <li class="fragment">No guarantee serialized format is <code>serialize()</code>-ish</li>
+              <li class="fragment">Breaks up the serializer, no optimizations</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+      <section>
+        <h3><code>__serialize</code>/<code>__unserialize</code> (PHP 7.4)</h3>
+        <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+          class User {
+              protected int $id;
+              protected string $name;
+              protected DateTime $lastLogin;
+
+              // ...
+
+              public function __serialize() : array {
+                  return ['id' => $this->id, 'name' => $this->name];
+              }
+
+              public function unserialize(array $data) : void {
+                  $this->id = $data['id'];
+                  $this->name = $data['name'];
+                  $this->lastLogin = UserSystem::getLastLogin($this->id);
+              }
+          }
+        </code></pre>
+        <pre><code class="php font--18" data-trim data-noescape data-line-numbers>
+          $s = serialize(new User());
+          print_r($s);
+
+          // O:4:"User":2:{s:2:"id";i:42;s:4:"name";s:5:"Larry";}
+        </code></pre>
+      </section>
+      <section>
+        <h3><code>__serialize</code>/<code>__unserialize</code></h3>
+        <div>
+          <h3>Done well</h3>
+          <ul>
+            <li class="fragment">Inheritance works</li>
+            <li class="fragment">Object references retained</li>
+            <li class="fragment">Full flexibility for what is serialized</li>
+            <li class="fragment">Let's the serializer engine do the hard work</li>
+            <li class="fragment">Backward compatible</li>
+            <li class="fragment">Identical format to <code>__sleep()</code></li>
+            <li class="fragment">Essentially a built-in "normalizer" operation</li>
+          </ul>
+        </div>
+        <div>
+          <h3 class="fragment">Problems</h3>
+          <ul>
+            <li class="fragment">None yet? :-)</li>
+          </ul>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>BC because methods ignored on older PHP versions</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Presidence</h3>
+        <p class=""><code>__serialize()</code> > <code>Serializable</code> > <code>__sleep()</code> > default</p>
+        <p class="fragment">O: <code>__unserialize()</code> > <code>__wakeup()</code> > default</p>
+        <p class="fragment">C: <code>Serializable</code> > <code>__wakeup()</code> > default</p>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <ul class="fragment">
+          <li>Any time you want to serialize an object</li>
+          <li>When you need a cheap normalized form</li>
+        </ul>
+      </section>
+    </section>
 
 
 
@@ -487,12 +659,12 @@
       * Array spread
       * Numeric literal separator: 1_000_000
       * Covariant return/contravariant params (return self doesn't suck now)
+      * Yet another serialization mechanism
 
       * Weakrefs
-      * Yet another serialization mechanism
       * Short closures
-      * FFI
       * Preloading
+      * FFI
 
       * Exceptions from __toString()
 
