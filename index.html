@@ -649,6 +649,167 @@
         </ul>
       </section>
     </section>
+    <section>
+      <section>
+        <h1>#7</h1>
+      </section>
+      <section>
+        <h3>This is too verbose</h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $users = [new User(1), new User(2), new User(3), /* ... */];
+
+          $field = 'first';
+
+          usort($users, function (User $u1, User $u2) use ($field) {
+              return $u1->get($field) <=> $u2->get($field);
+          });
+
+          $names = array_map(function(User $user) use ($field) {
+              return $user->get($field);
+          }, $users);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Anon functions very useful</li>
+            <li>Also very verbose</li>
+            <li>Manual scope import (like C++)</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Now more compact</h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $users = [new User(1), new User(2), new User(3), /* ... */];
+
+          $field = 'first';
+
+          usort($users, fn($u1, $u2) => $u1->get($field) <=> $u2->get($field));
+
+          $names = array_map(fn(User $user) => $user->get($field), $users);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Short-lambda / arrow function</li>
+            <li>Lambda = CS speak for function</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Short-lambda / Arrow function</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $func = fn() => *expression*;
+
+          $func = fn($a) => *expression*;
+
+          $func = fn(string $a): string => *expression*;
+        </code></pre>
+        <ul>
+          <li class="fragment">Supports types or not</li>
+          <li class="fragment">Single expression only</li>
+          <li class="fragment">Auto-capture by value</li>
+          <li class="fragment">Is itself a value literal</li>
+        </ul>
+        <aside class="notes">
+          <ul>
+            <li>Only for single-expression functions</li>
+            <li>More compact way of doing what you could before</li>
+            <li>"This is huge for functional programming"</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p style="font-size: 6em; font-weight: bold">For Functional Programming</p>
+        <aside class="notes">
+          <ul>
+            <li>FP built on function-is-value</li>
+            <li>Much easier to write function as value</li>
+            <li>Esp for functions operating on functions</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Trivial partial application</h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          function volume(float $x, float $y, float $z): float {
+              return $x * $y * $z;
+          }
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $x = 5;
+          $volumeWithX = function(float $y, float $z) use ($x): float {
+              return volume($x, $y, $z);
+          }
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $volumeWithX = fn(float $y, float $z): float => volume($x, $y, $z);
+
+          $volumeWithXY = fn(float $z) : float => $volumeWithX(4, $z);
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $volumeForLength = fn(float $y): float => volume(5, $y, 8);
+        </code></pre>
+      </section>
+      <section>
+        <h3>The class equivalent</h3>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          class YVolumizer {
+              private float $x;
+              private float $z;
+
+              public function __construct(float $x, float $z) {
+                  $this->x = $x;
+                  $this->z = $z;
+              }
+
+              public function __invoke(float $y): float {
+                  return $this->x * $y * $this->z;
+              }
+          }
+          $volumizerForLength = new YVolumizer(5, 8);
+          print $volumizerForLength(4);
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $volumeForLength = fn(float $y): float => volume(5, $y, 8);
+          print $volumeForLength(4);
+        </code></pre>
+      </section>
+      <section>
+        <h3>Make any function single-parameter</h3>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          function compose(callable ...$fns): callable {
+              return fn($x)
+                => array_reduce($fns, fn($collect, $fn)
+                  => $fn($collect), $x);
+          }
+
+          $holiday = "Lincoln's Birthday";
+          $findPromotionsFor = compose(
+              fn($x) => getShoppingList($x, 'wishlist'),
+              fn($x) => mostExpensiveItem($x, ['exclude' => 'onSale']),
+              fn($x) => getPromotions($x, $holiday),
+          );
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Makes building and assembling tiny components trivial in code</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <ul class="fragment">
+          <li>Most map/filter/usort calls</li>
+          <li>Call function parameters out of order</li>
+          <li>"Thinking in functions"</li>
+        </ul>
+        <aside class="notes">
+          <ul>
+            <li>My favorite feature</li>
+            <li>Will probably take a while for people to get it</li>
+          </ul>
+        </aside>
+      </section>
+    </section>
 
 
 
