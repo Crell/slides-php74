@@ -810,6 +810,74 @@
         </aside>
       </section>
     </section>
+    <section>
+      <section>
+        <h1>#8</h1>
+      </section>
+      <section>
+        <p class="oversize">Q: <q>What is the slowest, avoidable part of a large app?</q></p>
+        <p class="fragment oversize">A: Autoloading</p>
+        <aside class="notes">
+          <ul>
+            <li>All that time reading disk, relinking</li>
+            <li>Opcache only avoids recompiling</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>How PHP Opcache works</h3>
+        <img src="assets/php-include.svg" alt="PHP re-links code on every include" />
+        <aside class="notes">
+          <ul>
+            <li>Types and dependencies: Make sure classes actually align to parent/interfaces</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>How PHP 7.4 Opcache works</h3>
+        <img src="assets/php-include-preload.svg" alt="Preloading loads code into shared memory at system startup" />
+        <aside class="notes">
+          <ul>
+            <li>Reloading requires PHP-FPM restart</li>
+            <li>No disk IO, no autoload triggered, nothing</li>
+            <li>Not always a win; needs benchmarks</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <div>
+            <h3><code>php.ini</code></h3>
+            <pre><code class="ini font--20" data-trim data-noescape>
+              opcache.preload = preload-script.php
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <h3><code>preload-script.php</code></h3>
+            <pre><code class="php font--20" data-trim data-noescape>
+            $directory = new RecursiveDirectoryIterator(__DIR__ . '/vendor');
+            $iterator = new RecursiveIteratorIterator($directory);
+            $regex = new RegexIterator($iterator, '/^.+\.php$/i',
+                RecursiveRegexIterator::GET_MATCH);
+
+            foreach ($regex as $key => $file) {
+                // This is the important part!
+                opcache_compile_file($file[0]);
+            }
+          </code></pre>
+          </div>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Pre-loads all .php files in vendor</li>
+            <li>Not always the best strategy!</li>
+            <li>May want more or less</li>
+            <li>Does increase shared memory size</li>
+            <li>Do your own benchmarks</li>
+          </ul>
+        </aside>
+      </section>
+    </section>
 
 
 
@@ -821,9 +889,9 @@
       * Numeric literal separator: 1_000_000
       * Covariant return/contravariant params (return self doesn't suck now)
       * Yet another serialization mechanism
+      * Short closures
 
       * Weakrefs
-      * Short closures
       * Preloading
       * FFI
 
