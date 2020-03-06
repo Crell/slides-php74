@@ -1230,6 +1230,11 @@
                          : 'other';
         </code></pre>
         <p class="fragment"><code>$a == 1</code> prints <code>four</code></p>
+        <aside class="notes">
+          <ul>
+            <li>Every other language is the other way around (more logical)</li>
+          </ul>
+        </aside>
       </section>
       <section>
         <div class="layout-stacked" style="height: 600px">
@@ -1245,15 +1250,38 @@
             <h3>In all versions</h3>
             <p>What are you doing nesting ternaries like that???</p>
           </div>
+          <div class="fragment">
+            <p><code>$a ?: $b ?: $c</code> is unchanged</p>
+          </div>
         </div>
       </section>
       <section>
-        <p><code>array_key_exists()</code> with objects is deprecated</p>
-        <p class="fragment"><code>implode($pieces, $glue)</code> is deprecated</p>
-        <p class="fragment"><code>money_format()</code> is deprecated; use NumberFormatter::formatCurrency() instead</p>
-        <p class="fragment"><code>allow_url_include</code> is deprecated</p>
-        <p class="fragment"><code>$closure->bindTo(null)</code> is deprecated</p>
-        <p class="fragment">array access on non-container throws E_WARNING</p>
+        <h3>Concatenation precedence</h3>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          // How is this interpreted?
+          echo "sum: " . $a + $b;
+
+          // PHP 7.3
+          echo ("sum: " . $a) + $b;
+
+          // PHP 7.4 (what you probably always meant)
+          echo "sum :" . ($a + $b);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>All known cases where this changes behavior are actually bugs to begin with</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height:600px">
+          <p><code>array_key_exists()</code> with objects is deprecated</p>
+          <p class="fragment"><code>implode($pieces, $glue)</code> is deprecated</p>
+          <p class="fragment"><code>money_format()</code> is deprecated; use <code>NumberFormatter::formatCurrency()</code></p>
+          <p class="fragment"><code>allow_url_include</code> is deprecated</p>
+          <p class="fragment"><code>$closure->bindTo(null)</code> is deprecated</p>
+          <p class="fragment">array access on non-container throws E_WARNING</p>
+        </div>
         <aside class="notes">
           <ul>
             <li>implode() only takes the documented order, or no $glue</li>
@@ -1265,9 +1293,45 @@
         </aside>
       </section>
     </section>
+    <section>
+      <section>
+        <h2>&lt;aside&gt;</h2>
+      </section>
+      <section>
+        <div class="layout-col equal-width">
+          <div><img src="assets/nikita-popov.jpg" alt="Nikita Popov" /></div>
+          <div class="fragment"><img src="assets/jetbrains-logo.svg" alt="JetBrains" width="300px" data-credit="https://www.jetbrains.com/company/brand/logos/" /></div>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Long-time core contributor</li>
+            <li>Now full time at JetBrains working on PHP engine</li>
+            <li>7 / 27 RFCs (25%)</li>
+            <li>On company time!</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h2>&lt;/aside&gt;</h2>
+      </section>
+    </section>
+    <section>
+      <section>
+        <div class="layout-stacked" style="height:600px">
+          <div>
+            <p class="oversize"><q>So when should I use it?</q></p>
+            <p class="fragment oversize">Right now!</p>
+          </div>
+          <p class="fragment"><a href="http://phpversions.info/new-and-shiny/">PHP Versions</a> lists 17 compatible hosts</p>
+          <p class="fragment">(Yep, including <a href="https://platform.sh/">Platform.sh</a>)</p>
+        </div>
+      </section>
+    </section>
 
 
     <div style="display: none">
+
+      27 RFCs passed. 7 from Nikita
 
       * Typed Properties
       * Null coalesce assign
@@ -1287,8 +1351,6 @@
       ** Deprecate {} for array/sring offsets.
       ** Left-associative ternary
       ** Concat precedence
-
-
 
     </div>
 
