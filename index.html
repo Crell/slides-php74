@@ -1174,7 +1174,97 @@
         </aside>
       </section>
     </section>
+    <section>
+      <section>
+        <h1>#10</h1>
+      </section>
+      <section>
+        <p class="oversize">Beware these deprecations/changes</p>
+      </section>
+      <section>
+        <p class="oversize"><code>__toString</code> can now throw Exceptions</p>
+        <aside class="notes">
+          <ul>
+            <li>No reason it shouldn't before, it was just hard</li>
+            <li>May impact some error handling tests</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize"><code>{}</code> for strings and arrays is deprecated</p>
+        <p class="oversize fragment">Again...</p>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $array = [1, 2];
+          echo $array[1]; // prints 2
+          echo $array{1}; // also prints 2 - DEPRECATED
 
+          $string = "foo";
+          echo $string[0]; // prints "f"
+          echo $string{0}; // also prints "f" - DEPRECATED
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Soft-deprecated once, but didn't throw message</li>
+            <li>Still work, but will throw deprecation message</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize">Left-associative ternaries deprecated</p>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          return $a == 1 ? 'one'
+               : $a == 2 ? 'two'
+               : $a == 3 ? 'three'
+               : $a == 4 ? 'four'
+                         : 'other';
+        </code></pre>
+        <p class="fragment">Does that check <code>$a == 1</code> first, or last?</p>
+      </section>
+      <section>
+        <h3>In PHP 7.3</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          return ((($a == 1 ? 'one'
+               : $a == 2) ? 'two'
+               : $a == 3) ? 'three'
+               : $a == 4) ? 'four'
+                         : 'other';
+        </code></pre>
+        <p class="fragment"><code>$a == 1</code> prints <code>four</code></p>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 600px">
+          <div>
+            <h3>In PHP 7.4</h3>
+            <p>Parentheses are required when nested, deprecation warning otherwise</p>
+          </div>
+          <div class="fragment">
+            <h3>In PHP 8.0</h3>
+            <p>Parentheses are required when nested, compile error otherwise</p>
+          </div>
+          <div class="fragment">
+            <h3>In all versions</h3>
+            <p>What are you doing nesting ternaries like that???</p>
+          </div>
+        </div>
+      </section>
+      <section>
+        <p><code>array_key_exists()</code> with objects is deprecated</p>
+        <p class="fragment"><code>implode($pieces, $glue)</code> is deprecated</p>
+        <p class="fragment"><code>money_format()</code> is deprecated; use NumberFormatter::formatCurrency() instead</p>
+        <p class="fragment"><code>allow_url_include</code> is deprecated</p>
+        <p class="fragment"><code>$closure->bindTo(null)</code> is deprecated</p>
+        <p class="fragment">array access on non-container throws E_WARNING</p>
+        <aside class="notes">
+          <ul>
+            <li>implode() only takes the documented order, or no $glue</li>
+            <li>money_format() is buggy</li>
+            <li>allow_url_include is a security hole</li>
+            <li>Unbinding $this makes closure engine code unsafe</li>
+            <li>non-container: int, object, etc. Was always a bug, now get message</li>
+          </ul>
+        </aside>
+      </section>
+    </section>
 
 
     <div style="display: none">
