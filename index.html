@@ -854,7 +854,7 @@
           </div>
           <div class="fragment">
             <h3><code>preload-script.php</code></h3>
-            <pre><code class="php font--20" data-trim data-noescape>
+            <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
             $directory = new RecursiveDirectoryIterator(__DIR__ . '/vendor');
             $iterator = new RecursiveIteratorIterator($directory);
             $regex = new RegexIterator($iterator, '/^.+\.php$/i',
@@ -877,6 +877,302 @@
           </ul>
         </aside>
       </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <ul class="fragment">
+          <li>Let benchmarks tell you</li>
+          <li>Anything not easily autoloaded (functions)</li>
+          <li>I'll probably use it for most code</li>
+        </ul>
+      </section>
+    </section>
+    <section>
+      <section>
+        <h1>#9</h1>
+      </section>
+      <section>
+        <img src="assets/australian-water-dragon.jpg" alt="Here be dragons!" data-credit="https://www.flickr.com/photos/merryjack/26151133470/" />
+        <aside class="notes">
+          <ul>
+            <li>Here be dragons...</li>
+            <li>Australian water dragon, cute!</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Foreign Function Interface</h3>
+        <ul>
+          <li class="fragment">Expose C ABI code to PHP</li>
+          <li class="fragment">Works with any compiled C ABI language, (Mainly C and Rust)</li>
+          <li class="fragment">Kind of a clunky API</li>
+          <li class="fragment">Many security considerations</li>
+        </ul>
+      </section>
+      <section>
+        <h3><code>points.h</code></h3>
+        <pre><code class="c font--20" data-trim data-noescape data-line-numbers>
+          struct point {
+              int     x;
+              int     y;
+          };
+
+          double distance(struct point first, struct point second);
+        </code></pre>
+        <h3><code>points.c</code></h3>
+        <pre><code class="c font--20" data-trim data-noescape data-line-numbers>
+          #include "points.h"
+          #include &lt;math.h&gt;
+
+          double distance(struct point first, struct point second) {
+              double a_squared = pow((second.x - first.x), 2);
+              double b_squared = pow((second.y - first.y), 2);
+
+              return sqrt(a_squared + b_squared);
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Compile to a .so file.</li>
+            <li>Won't go into details for time</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3><code>classes.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          class Point {
+             public int $x;
+             public int $y;
+
+             public function __construct(int $x, int $y) {
+                 $this->x = $x;
+                 $this->y = $y;
+             }
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Not required for FFI, but good practice</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3><code>inline.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          require_once 'classes.php';
+
+          $ffi = FFI::cdef(file_get_contents('points.h'), 'points.so');
+
+          $p1 = new Point(3, 4);
+          $p2 = new Point(7, 9);
+
+          $cp1 = $ffi->new('struct point');
+          $cp2 = $ffi->new('struct point');
+
+          $cp1->x = $p1->x;
+          $cp1->y = $p1->y;
+          $cp2->x = $p2->x;
+          $cp2->y = $p2->y;
+
+          $d = $ffi->distance($cp1, $cp2);
+
+          print "Distance is $d\n";
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>cdef() wants definition, which is header file, or fragment thereof</li>
+            <li>Note: PHP's header file parser is custom and crap</li>
+            <li>Need to define manual file for most libs</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 600px">
+          <pre><code class="bash font--24" data-trim data-noescape data-line-numbers>
+            $ php inline.php
+            Distance is 6.4031242374328
+          </code></pre>
+          <h1 class="fragment">:-)</h1>
+          <p class="oversize fragment">But this is super slow</p>
+          <h1 class="fragment">:-(</h1>
+        </div>
+      </section>
+      <section>
+        <h3>FFI performance</h3>
+        <ul>
+          <li class="fragment">C code is way faster than PHP</li>
+          <li class="fragment">Initializing the library on each request is very slow</li>
+          <li class="fragment">Calling across the PHP/C boundary is very slow</li>
+        </ul>
+        <p class="fragment oversize"><em>Running arbitrary C code is stupidly insecure!</em></p>
+      </section>
+      <section>
+        <h3>Preloading FFI</h3>
+        <ul>
+          <li class="fragment">FFI only works from CLI or in preload code</li>
+          <li class="fragment"><code>ffi.enable=true</code> (don't do this in prod!)</li>
+          <li class="fragment">Default is <code>preload</code></li>
+          <li class="fragment">Preload requires Opcache</li>
+          <li class="fragment">Opcache not enabled on CLI by default</li>
+        </ul>
+      </section>
+      <section>
+        <h3><code>points.h</code></h3>
+        <pre><code class="c font--20" data-trim data-noescape data-line-numbers>
+          #define FFI_SCOPE "POINTS"
+          #define FFI_LIB "./points.so"
+
+          struct point {
+              int     x;
+              int     y;
+          };
+
+          double distance(struct point first, struct point second);
+        </code></pre>
+        <h3><code>preloader.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          FFI::load(__DIR__ . "/points.h");
+          opcache_compile_file(__DIR__ . "/classes.php");
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>#defines used by FFI to know what the header file is for</li>
+            <li>SCOPE is how PHP will know this lib</li>
+            <li>load() parses header file, loads lib into memory once</li>
+            <li>Preload the class file while we're at it.</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3><code>preload.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $ffi = \FFI::scope("POINTS");
+
+          $p1 = new Point(3, 4);
+          $p2 = new Point(7, 9);
+
+          $cp1 = $ffi->new('struct point');
+          $cp2 = $ffi->new('struct point');
+
+          $cp1->x = $p1->x;
+          $cp1->y = $p1->y;
+          $cp2->x = $p2->x;
+          $cp2->y = $p2->y;
+
+          $d = $ffi->distance($cp1, $cp2);
+
+          print "Distance is $d\n";
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>scope() gets reference to the lib already in memory</li>
+            <li>The rest of the code is the same</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+          <pre><code class="bash font--20" data-trim data-noescape data-line-numbers>
+            $ php -d opcache.preload="preloader.php" \
+                  -d opcache.enable_cli=true \
+                  preload.php
+            Distance is 6.4031242374328
+          </code></pre>
+      </section>
+      <section>
+        <h3>Abstract the API</h3>
+        <h3><code>classes.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+        class Point {
+            public int $x;
+            public int $y;
+
+            public function __construct(int $x, int $y) {
+                $this->x = $x;
+                $this->y = $y;
+            }
+
+            public function toStruct($ffi) {
+                $cp = $ffi->new('struct point');
+                $cp->x = $this->x;
+                $cp->y = $this->y;
+                return $cp;
+            }
+        }
+        </code></pre>
+      </section>
+      <section>
+        <h3>Abstract the API</h3>
+        <h3><code>classes.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+        class PointApi {
+            private static $ffi = null;
+
+            public function __construct() {
+                static::$ffi ??= \FFI::scope("POINTS");
+            }
+
+            public function distance(Point $p1, Point $p2): float {
+                $cp1 = $p1->toStruct(static::$ffi);
+                $cp2 = $p2->toStruct(static::$ffi);
+
+                return static::$ffi->distance($cp1, $cp2);
+            }
+        }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Look, null-coalesce assign!</li>
+            <li>$ffi scopes are cheap, safe to reuse</li>
+            <li>Hides the FFI from the end user</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3><code>preload.php</code></h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $p1 = new Point(3, 4);
+          $p2 = new Point(7, 9);
+
+          $api = new PointApi();
+
+          $d = $api->distance($p1, $p2);
+
+          print "Distance is $d\n";
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Hide all the fiddly bits</li>
+            <li>The API is now super simple</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <p class="oversize">It works with Rust-based .so files, too!</p>
+        <p class="fragment oversize">(Though you'll need a manual header file)</p>
+      </section>
+      <section>
+        <h3>Examples and resources</h3>
+        <ul>
+          <li><a href="https://platform.sh/blog/2020/php-fun-with-ffi-just-enough-c/">PHPfun with FFI series</a></li>
+          <li><a href="https://github.com/platformsh-examples/php-ffi">These examples in C and Rust</a></li>
+          <li><a href="https://github.com/gabrielrcouto/awesome-php-ffi">FFI with existing libs</a> from Gabriel Couto</li>
+        </ul>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <ul class="fragment">
+          <li>Not for everyday use</li>
+          <li><em>Existing</em> large C libraries you want to use (Machine learning?)</li>
+          <li>Very complex self-contained algorithms (use Rust)</li>
+          <li>Only when you would have needed an extension</li>
+        </ul>
+        <aside class="notes">
+          <ul>
+            <li>My favorite feature</li>
+            <li>Will probably take a while for people to get it</li>
+          </ul>
+        </aside>
+      </section>
     </section>
 
 
@@ -890,9 +1186,9 @@
       * Covariant return/contravariant params (return self doesn't suck now)
       * Yet another serialization mechanism
       * Short closures
+      * Preloading
 
       * Weakrefs
-      * Preloading
       * FFI
 
       * Exceptions from __toString()
