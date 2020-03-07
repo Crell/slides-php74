@@ -48,7 +48,19 @@
         </ul>
       </div>
     </section>
-
+    <section>
+      <div class="layout-stacked" style="height: 600px">
+        <div><img src="assets/php-logo.svg" alt="PHP 7" data-credit="https://commons.wikimedia.org/wiki/File:PHP-logo.svg" /></div>
+        <h1>7.4</h1>
+      </div>
+      <aside class="notes">
+        <ul>
+          <li>Who's using it yet?</li>
+          <li>Biggest PHP release since 7.0</li>
+          <li>Top 10 things to expect</li>
+        </ul>
+      </aside>
+    </section>
     <section>
       <section>
         <h1>#1</h1>
@@ -788,6 +800,8 @@
               fn($x) => mostExpensiveItem($x, ['exclude' => 'onSale']),
               fn($x) => getPromotions($x, $holiday),
           );
+
+          $findPromotionsFor($someUser);
         </code></pre>
         <aside class="notes">
           <ul>
@@ -889,6 +903,12 @@
     <section>
       <section>
         <h1>#9</h1>
+        <aside class="notes">
+          <ul>
+            <li>This one is tricky and edge case-y</li>
+            <li>FFI</li>
+          </ul>
+        </aside>
       </section>
       <section>
         <img src="assets/australian-water-dragon.jpg" alt="Here be dragons!" data-credit="https://www.flickr.com/photos/merryjack/26151133470/" />
@@ -903,7 +923,7 @@
         <h3>Foreign Function Interface</h3>
         <ul>
           <li class="fragment">Expose C ABI code to PHP</li>
-          <li class="fragment">Works with any compiled C ABI language, (Mainly C and Rust)</li>
+          <li class="fragment">Works with any compiled C ABI language (mainly C and Rust)</li>
           <li class="fragment">Kind of a clunky API</li>
           <li class="fragment">Many security considerations</li>
         </ul>
@@ -1162,16 +1182,10 @@
         <p class="oversize"><q>So when should I use it?</q></p>
         <ul class="fragment">
           <li>Not for everyday use</li>
+          <li>When you would have needed an extension</li>
           <li><em>Existing</em> large C libraries you want to use (Machine learning?)</li>
-          <li>Very complex self-contained algorithms (use Rust)</li>
-          <li>Only when you would have needed an extension</li>
+          <li>Very complex self-contained algorithms (Use Rust)</li>
         </ul>
-        <aside class="notes">
-          <ul>
-            <li>My favorite feature</li>
-            <li>Will probably take a while for people to get it</li>
-          </ul>
-        </aside>
       </section>
     </section>
     <section>
