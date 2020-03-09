@@ -76,14 +76,14 @@
               'usr' => 8,
           ];
         </code></pre>
-        <ul style="margin-top: 1em;">
-          <li class="fragment">Is canceled spelled right?</li>
-          <li class="fragment">Is usr correct or a typo?</li>
-          <li class="fragment">Is user an ID or User object?</li>
-          <li class="fragment">Are skus numeric or strings?</li>
-          <li class="fragment">Can skus be a single value?</li>
-          <li class="fragment">Are there other properties?</li>
-          <li class="fragment">What currency is total in?</li>
+        <ul class="fragment" style="margin-top: 1em;">
+          <li>Is canceled spelled right?</li>
+          <li>Is usr correct or a typo?</li>
+          <li>Is user an ID or User object?</li>
+          <li>Are skus numeric or strings?</li>
+          <li>Can skus be a single value?</li>
+          <li>Are there other properties?</li>
+          <li>What currency is total in?</li>
         </ul>
       </section>
       <section>
@@ -146,7 +146,7 @@
         </aside>
       </section>
       <section>
-        <h3>Defaults are logical</h3>
+        <h3>Literal defaults work</h3>
         <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
           class Test {
               // Legal default values
@@ -289,7 +289,7 @@
             </code></pre>
           </div>
           <div class="fragment">
-            <h3>Spread!</h3>
+            <h3>Splat (Spread)!</h3>
             <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
               $a1 = [1, 2, 3];
               $a2 = [4, 5, 6];
@@ -316,7 +316,7 @@
           }
         </code></pre>
           <ul class="fragment">
-            <li class="oversize">... in function def: Replaces func_get_args()</li>
+            <li>... in function def: Replaces func_get_args()</li>
             <li>... in function call: Replaces call_user_func_array()</li>
             <li>... in array: Replaces array_merge()</li>
           </ul>
@@ -326,6 +326,7 @@
       <section>
         <p class="oversize"><q>So when should I use it?</q></p>
         <p class="fragment oversize">Anytime you would have used array_merge()</p>
+        <p class="fragment oversize">Embedding one sequential array inside another</p>
       </section>
     </section>
     <section>
@@ -649,9 +650,9 @@
       </section>
       <section>
         <h3>Presidence</h3>
-        <p class=""><code>__serialize()</code> > <code>Serializable</code> > <code>__sleep()</code> > default</p>
+        <p><code>__serialize()</code> > <code>Serializable</code> > <code>__sleep()</code> > default</p>
         <p class="fragment">O: <code>__unserialize()</code> > <code>__wakeup()</code> > default</p>
-        <p class="fragment">C: <code>Serializable</code> > <code>__wakeup()</code> > default</p>
+        <p class="fragment">C: <code>Serializable</code> > default</p>
       </section>
       <section>
         <p class="oversize"><q>So when should I use it?</q></p>
@@ -723,7 +724,6 @@
         </ul>
         <aside class="notes">
           <ul>
-            <li>Only for single-expression functions</li>
             <li>More compact way of doing what you could before</li>
             <li>"This is huge for functional programming"</li>
           </ul>
@@ -748,13 +748,10 @@
         </code></pre>
         <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
           $x = 5;
-          $volumeWithX = function(float $y, float $z) use ($x): float {
-              return volume($x, $y, $z);
-          }
+
+          $volumeWithX = fn(float $y, float $z): float => volume($x, $y, $z);
         </code></pre>
         <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $volumeWithX = fn(float $y, float $z): float => volume($x, $y, $z);
-
           $volumeWithXY = fn(float $z) : float => $volumeWithX(4, $z);
         </code></pre>
         <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
@@ -774,7 +771,7 @@
               }
 
               public function __invoke(float $y): float {
-                  return $this->x * $y * $this->z;
+                  return volume($this->x, $y, $this->z);
               }
           }
           $volumizerForLength = new YVolumizer(5, 8);
@@ -790,8 +787,8 @@
         <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
           function compose(callable ...$fns): callable {
               return fn($x)
-                => array_reduce($fns, fn($collect, $fn)
-                  => $fn($collect), $x);
+                => array_reduce($fns, fn($collect, $func)
+                  => $func($collect), $x);
           }
 
           $holiday = "Lincoln's Birthday";
@@ -831,12 +828,6 @@
       <section>
         <p class="oversize">Q: <q>What is the slowest, avoidable part of a large app?</q></p>
         <p class="fragment oversize">A: Autoloading</p>
-        <aside class="notes">
-          <ul>
-            <li>All that time reading disk, relinking</li>
-            <li>Opcache only avoids recompiling</li>
-          </ul>
-        </aside>
       </section>
       <section>
         <h3>How PHP Opcache works</h3>
@@ -844,6 +835,8 @@
         <aside class="notes">
           <ul>
             <li>Types and dependencies: Make sure classes actually align to parent/interfaces</li>
+            <li>All that time reading disk, relinking</li>
+            <li>Opcache only avoids recompiling</li>
           </ul>
         </aside>
       </section>
