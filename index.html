@@ -48,7 +48,7 @@
         </ul>
       </div>
     </section>
-    <section>
+    <section id="intro">
       <div class="layout-stacked" style="height: 600px">
         <div><img src="assets/php-logo.svg" alt="PHP 7" data-credit="https://commons.wikimedia.org/wiki/File:PHP-logo.svg" /></div>
         <h1>7.4</h1>
@@ -61,7 +61,7 @@
         </ul>
       </aside>
     </section>
-    <section>
+    <section id="typed-properties">
       <section>
         <h1>#1</h1>
       </section>
@@ -199,7 +199,7 @@
         <p class="fragment oversize">Pretty much always</p>
       </section>
     </section>
-    <section>
+    <section id="null-coalesce-assign">
       <section>
         <h1>#2</h1>
       </section>
@@ -246,143 +246,168 @@
         </ul>
       </section>
     </section>
-    <section>
+    <section id="short-lambdas">
       <section>
         <h1>#3</h1>
       </section>
       <section>
-        <h3>How do you combine arrays?</h3>
+        <h3>This is too verbose</h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $users = [new User(1), new User(2), new User(3), /* ... */];
+
+          $field = 'first';
+
+          usort($users, function (User $u1, User $u2) use ($field) {
+              return $u1->get($field) <=> $u2->get($field);
+          });
+
+          $names = array_map(function(User $user) use ($field) {
+              return $user->get($field);
+          }, $users);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Anon functions very useful</li>
+            <li>Also very verbose</li>
+            <li>Manual scope import (like C++)</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Now more compact</h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $users = [new User(1), new User(2), new User(3), /* ... */];
+
+          $field = 'first';
+
+          usort($users, fn($u1, $u2) => $u1->get($field) <=> $u2->get($field));
+
+          $names = array_map(fn(User $user) => $user->get($field), $users);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Short-lambda / arrow function</li>
+            <li>Lambda = CS speak for function</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <h3>Short-lambda / Arrow function</h3>
         <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-          $a1 = [1, 2, 3];
-          $a2 = [4, 5, 6];
+          $func = fn() => *expression*;
+
+          $func = fn($a) => *expression*;
+
+          $func = fn(string $a): string => *expression*;
         </code></pre>
-        <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
-          $b = $a1 + $a2; // Maybe?
-          var_dump($b);
-        </code></pre>
-        <p class="fragment">Wrong!  Only for all-associative arrays.</p>
-        <pre class="fragment"><code class="php font--24" data-trim data-noescape>
-          array(3) {
-            [0]=>
-            int(1)
-            [1]=>
-            int(2)
-            [2]=>
-            int(3)
-          }
-        </code></pre>
+        <ul>
+          <li class="fragment">Supports types or not</li>
+          <li class="fragment">Single expression only</li>
+          <li class="fragment">Auto-capture by value</li>
+          <li class="fragment">Is itself a value literal</li>
+        </ul>
         <aside class="notes">
           <ul>
-            <li>array addition only assigns on unmatched key</li>
+            <li>More compact way of doing what you could before</li>
+            <li>"This is huge for functional programming"</li>
           </ul>
         </aside>
       </section>
       <section>
-        <div class="layout-stacked" style="height: 600px">
-          <div>
-            <h3>Fugly</h3>
-            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-              $a1 = [1, 2, 3];
-              $a2 = [4, 5, 6];
-
-              $b = array_merge($a1, $a2);  // Eew.
-            </code></pre>
-          </div>
-          <div class="fragment">
-            <h3>Splat (Spread)!</h3>
-            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-              $a1 = [1, 2, 3];
-              $a2 = [4, 5, 6];
-
-              $b = [...$a1, ...$a2];
-            </code></pre>
-          </div>
-        </div>
+        <p style="font-size: 6em; font-weight: bold">For Functional Programming</p>
         <aside class="notes">
           <ul>
-            <li>Reads as "enumerate all the values in the array"</li>
-            <li>Only works for indexed arrays!</li>
+            <li>FP built on function-is-value</li>
+            <li>Much easier to write function as value</li>
+            <li>Esp for functions operating on functions</li>
           </ul>
         </aside>
       </section>
       <section>
-        <div class="layout-stacked" style="height: 650px">
-          <h3>Spread 'em all</h3>
-          <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
-          function afunc(string $b, User ...$users) : callable
-          {
-              $params = [$a, $b, ...$users];
-              anotherFunc(...$params);
+        <h3>Trivial partial application</h3>
+        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
+          function volume(float $x, float $y, float $z): float {
+              return $x * $y * $z;
           }
         </code></pre>
-          <ul class="fragment">
-            <li>... in function def: Replaces func_get_args()</li>
-            <li>... in function call: Replaces call_user_func_array()</li>
-            <li>... in array: Replaces array_merge()</li>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $x = 5;
+
+          $volumeWithX = fn(float $y, float $z): float => volume($x, $y, $z);
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $volumeWithXY = fn(float $z) : float => $volumeWithX(4, $z);
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $volumeForLength = fn(float $y): float => volume(5, $y, 8);
+        </code></pre>
+      </section>
+      <section>
+        <h3>The class equivalent</h3>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          class YVolumizer {
+              private float $x;
+              private float $z;
+
+              public function __construct(float $x, float $z) {
+                  $this->x = $x;
+                  $this->z = $z;
+              }
+
+              public function __invoke(float $y): float {
+                  return volume($this->x, $y, $this->z);
+              }
+          }
+          $volumizerForLength = new YVolumizer(5, 8);
+          print $volumizerForLength(4);
+        </code></pre>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          $volumeForLength = fn(float $y): float => volume(5, $y, 8);
+          print $volumeForLength(4);
+        </code></pre>
+      </section>
+      <section>
+        <h3>Make any function single-parameter</h3>
+        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
+          function compose(callable ...$fns): callable {
+              return fn($x)
+                => array_reduce($fns, fn($collect, $func)
+                  => $func($collect), $x);
+          }
+
+          $holiday = "Lincoln's Birthday";
+          $findPromotionsFor = compose(
+              fn($x) => getShoppingList($x, 'wishlist'),
+              fn($x) => mostExpensiveItem($x, ['exclude' => 'onSale']),
+              fn($x) => getPromotions($x, $holiday),
+          );
+
+          $findPromotionsFor($someUser);
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>Makes building and assembling tiny components trivial in code</li>
           </ul>
-          <p class="fragment oversize">... That's amazing!</p>
-        </div>
+        </aside>
       </section>
       <section>
         <p class="oversize"><q>So when should I use it?</q></p>
-        <p class="fragment oversize">Anytime you would have used array_merge()</p>
-        <p class="fragment oversize">Embedding one sequential array inside another</p>
+        <ul class="fragment">
+          <li>Most map/filter/usort calls</li>
+          <li>Call function parameters out of order</li>
+          <li>"Thinking in functions"</li>
+        </ul>
+        <aside class="notes">
+          <ul>
+            <li>My favorite feature</li>
+            <li>Will probably take a while for people to get it</li>
+          </ul>
+        </aside>
       </section>
     </section>
-    <section>
+    <section id="covariance-contravariance">
       <section>
         <h1>#4</h1>
-      </section>
-      <section>
-        <div class="layout-stacked" style="height: 650px">
-          <div>
-            <p>Think fast, what number is this?</p>
-            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-              $num = 10000000000000;
-            </code></pre>
-          </div>
-          <div class="fragment">
-            <p>How about this?</p>
-            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-              $num = 10_000_000_000_000;
-            </code></pre>
-          </div>
-          <p class="fragment oversize">Compile identically</p>
-        </div>
-        <aside class="notes">
-          <ul>
-            <li>10 trillion</li>
-          </ul>
-        </aside>
-      </section>
-      <section>
-        <h3>Any numeric value</h3>
-        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-          6.674_083e-11; // float
-          299_792_458;   // integer
-          0xCAFE_F00D;   // hexadecimal
-          0b0101_1111;   // binary
-          0137_041;      // octal
-        </code></pre>
-        <aside class="notes">
-          <ul>
-            <li>Between any two digits</li>
-            <li>For readability only</li>
-          </ul>
-        </aside>
-      </section>
-      <section>
-        <p class="oversize"><q>So when should I use it?</q></p>
-        <ul class="fragment oversize">
-          <li>Big number constants</li>
-          <li>Binary literals</li>
-          <li>Hex address literals</li>
-        </ul>
-      </section>
-    </section>
-    <section>
-      <section>
-        <h1>#5</h1>
       </section>
       <section>
         <h2>Full method<br />covariance and contravariance</h2>
@@ -489,9 +514,9 @@
         <p class="fragment oversize">Any time you want (especially value objects)!</p>
       </section>
     </section>
-    <section>
+    <section id="serialization">
       <section>
-        <h1>#6</h1>
+        <h1>#5</h1>
         <aside class="notes">
           <ul>
             <li>Let's talk about serialization...</li>
@@ -662,166 +687,141 @@
         </ul>
       </section>
     </section>
-    <section>
+    <section id="splat">
+      <section>
+        <h1>#6</h1>
+      </section>
+      <section>
+        <h3>How do you combine arrays?</h3>
+        <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $a1 = [1, 2, 3];
+          $a2 = [4, 5, 6];
+        </code></pre>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          $b = $a1 + $a2; // Maybe?
+          var_dump($b);
+        </code></pre>
+        <p class="fragment">Wrong!  Only for all-associative arrays.</p>
+        <pre class="fragment"><code class="php font--24" data-trim data-noescape>
+          array(3) {
+            [0]=>
+            int(1)
+            [1]=>
+            int(2)
+            [2]=>
+            int(3)
+          }
+        </code></pre>
+        <aside class="notes">
+          <ul>
+            <li>array addition only assigns on unmatched key</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 600px">
+          <div>
+            <h3>Fugly</h3>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $a1 = [1, 2, 3];
+              $a2 = [4, 5, 6];
+
+              $b = array_merge($a1, $a2);  // Eew.
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <h3>Splat (Spread)!</h3>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $a1 = [1, 2, 3];
+              $a2 = [4, 5, 6];
+
+              $b = [...$a1, ...$a2];
+            </code></pre>
+          </div>
+        </div>
+        <aside class="notes">
+          <ul>
+            <li>Reads as "enumerate all the values in the array"</li>
+            <li>Only works for indexed arrays!</li>
+          </ul>
+        </aside>
+      </section>
+      <section>
+        <div class="layout-stacked" style="height: 650px">
+          <h3>They all go splat</h3>
+          <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
+          function afunc(string $b, User ...$users) : callable
+          {
+              $params = [$a, $b, ...$users];
+              anotherFunc(...$params);
+          }
+        </code></pre>
+          <ul class="fragment">
+            <li>... in function def: Replaces func_get_args()</li>
+            <li>... in function call: Replaces call_user_func_array()</li>
+            <li>... in array: Replaces array_merge()</li>
+          </ul>
+          <p class="fragment oversize">... That's amazing!</p>
+        </div>
+      </section>
+      <section>
+        <p class="oversize"><q>So when should I use it?</q></p>
+        <p class="fragment oversize">Anytime you would have used array_merge()</p>
+        <p class="fragment oversize">Embedding one sequential array inside another</p>
+      </section>
+    </section>
+    <section id="number-literal-separator">
       <section>
         <h1>#7</h1>
       </section>
       <section>
-        <h3>This is too verbose</h3>
-        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $users = [new User(1), new User(2), new User(3), /* ... */];
-
-          $field = 'first';
-
-          usort($users, function (User $u1, User $u2) use ($field) {
-              return $u1->get($field) <=> $u2->get($field);
-          });
-
-          $names = array_map(function(User $user) use ($field) {
-              return $user->get($field);
-          }, $users);
-        </code></pre>
+        <div class="layout-stacked" style="height: 650px">
+          <div>
+            <p>Think fast, what number is this?</p>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $num = 10000000000000;
+            </code></pre>
+          </div>
+          <div class="fragment">
+            <p>How about this?</p>
+            <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
+              $num = 10_000_000_000_000;
+            </code></pre>
+          </div>
+          <p class="fragment oversize">Compile identically</p>
+        </div>
         <aside class="notes">
           <ul>
-            <li>Anon functions very useful</li>
-            <li>Also very verbose</li>
-            <li>Manual scope import (like C++)</li>
+            <li>10 trillion</li>
           </ul>
         </aside>
       </section>
       <section>
-        <h3>Now more compact</h3>
-        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $users = [new User(1), new User(2), new User(3), /* ... */];
-
-          $field = 'first';
-
-          usort($users, fn($u1, $u2) => $u1->get($field) <=> $u2->get($field));
-
-          $names = array_map(fn(User $user) => $user->get($field), $users);
-        </code></pre>
-        <aside class="notes">
-          <ul>
-            <li>Short-lambda / arrow function</li>
-            <li>Lambda = CS speak for function</li>
-          </ul>
-        </aside>
-      </section>
-      <section>
-        <h3>Short-lambda / Arrow function</h3>
+        <h3>Any numeric value</h3>
         <pre><code class="php font--24" data-trim data-noescape data-line-numbers>
-          $func = fn() => *expression*;
-
-          $func = fn($a) => *expression*;
-
-          $func = fn(string $a): string => *expression*;
-        </code></pre>
-        <ul>
-          <li class="fragment">Supports types or not</li>
-          <li class="fragment">Single expression only</li>
-          <li class="fragment">Auto-capture by value</li>
-          <li class="fragment">Is itself a value literal</li>
-        </ul>
-        <aside class="notes">
-          <ul>
-            <li>More compact way of doing what you could before</li>
-            <li>"This is huge for functional programming"</li>
-          </ul>
-        </aside>
-      </section>
-      <section>
-        <p style="font-size: 6em; font-weight: bold">For Functional Programming</p>
-        <aside class="notes">
-          <ul>
-            <li>FP built on function-is-value</li>
-            <li>Much easier to write function as value</li>
-            <li>Esp for functions operating on functions</li>
-          </ul>
-        </aside>
-      </section>
-      <section>
-        <h3>Trivial partial application</h3>
-        <pre><code class="php font--20" data-trim data-noescape data-line-numbers>
-          function volume(float $x, float $y, float $z): float {
-              return $x * $y * $z;
-          }
-        </code></pre>
-        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $x = 5;
-
-          $volumeWithX = fn(float $y, float $z): float => volume($x, $y, $z);
-        </code></pre>
-        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $volumeWithXY = fn(float $z) : float => $volumeWithX(4, $z);
-        </code></pre>
-        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $volumeForLength = fn(float $y): float => volume(5, $y, 8);
-        </code></pre>
-      </section>
-      <section>
-        <h3>The class equivalent</h3>
-        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          class YVolumizer {
-              private float $x;
-              private float $z;
-
-              public function __construct(float $x, float $z) {
-                  $this->x = $x;
-                  $this->z = $z;
-              }
-
-              public function __invoke(float $y): float {
-                  return volume($this->x, $y, $this->z);
-              }
-          }
-          $volumizerForLength = new YVolumizer(5, 8);
-          print $volumizerForLength(4);
-        </code></pre>
-        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $volumeForLength = fn(float $y): float => volume(5, $y, 8);
-          print $volumeForLength(4);
-        </code></pre>
-      </section>
-      <section>
-        <h3>Make any function single-parameter</h3>
-        <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          function compose(callable ...$fns): callable {
-              return fn($x)
-                => array_reduce($fns, fn($collect, $func)
-                  => $func($collect), $x);
-          }
-
-          $holiday = "Lincoln's Birthday";
-          $findPromotionsFor = compose(
-              fn($x) => getShoppingList($x, 'wishlist'),
-              fn($x) => mostExpensiveItem($x, ['exclude' => 'onSale']),
-              fn($x) => getPromotions($x, $holiday),
-          );
-
-          $findPromotionsFor($someUser);
+          6.674_083e-11; // float
+          299_792_458;   // integer
+          0xCAFE_F00D;   // hexadecimal
+          0b0101_1111;   // binary
+          0137_041;      // octal
         </code></pre>
         <aside class="notes">
           <ul>
-            <li>Makes building and assembling tiny components trivial in code</li>
+            <li>Between any two digits</li>
+            <li>For readability only</li>
           </ul>
         </aside>
       </section>
       <section>
         <p class="oversize"><q>So when should I use it?</q></p>
-        <ul class="fragment">
-          <li>Most map/filter/usort calls</li>
-          <li>Call function parameters out of order</li>
-          <li>"Thinking in functions"</li>
+        <ul class="fragment oversize">
+          <li>Big number constants</li>
+          <li>Binary literals</li>
+          <li>Hex address literals</li>
         </ul>
-        <aside class="notes">
-          <ul>
-            <li>My favorite feature</li>
-            <li>Will probably take a while for people to get it</li>
-          </ul>
-        </aside>
       </section>
     </section>
-    <section>
+    <section id="preload">
       <section>
         <h1>#8</h1>
       </section>
@@ -893,7 +893,7 @@
         </ul>
       </section>
     </section>
-    <section>
+    <section id="ffi">
       <section>
         <h1>#9</h1>
         <aside class="notes">
@@ -1181,7 +1181,7 @@
         </ul>
       </section>
     </section>
-    <section>
+    <section id="deprecations">
       <section>
         <h1>#10</h1>
       </section>
@@ -1300,7 +1300,7 @@
         </aside>
       </section>
     </section>
-    <section>
+    <section id="nikita">
       <section>
         <h2>&lt;aside&gt;</h2>
       </section>
@@ -1323,7 +1323,7 @@
         <h2>&lt;/aside&gt;</h2>
       </section>
     </section>
-    <section>
+    <section id="availability">
       <section>
         <div class="layout-stacked" style="height:600px">
           <div>
@@ -1335,32 +1335,6 @@
         </div>
       </section>
     </section>
-
-
-    <div style="display: none">
-
-      27 RFCs passed. 7 from Nikita
-
-      * Typed Properties
-      * Null coalesce assign
-      * Array spread
-      * Numeric literal separator: 1_000_000
-      * Covariant return/contravariant params (return self doesn't suck now)
-      * Yet another serialization mechanism
-      * Short closures
-      * Preloading
-
-      * Weakrefs
-      * FFI
-
-      * Exceptions from __toString()
-
-      * Deprecations and changes to prepare for PHP 8
-      ** Deprecate {} for array/sring offsets.
-      ** Left-associative ternary
-      ** Concat precedence
-
-    </div>
 
     <section id="final">
       <h2>Larry Garfield</h2>
