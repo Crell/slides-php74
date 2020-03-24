@@ -633,7 +633,7 @@
                   return ['id' => $this->id, 'name' => $this->name];
               }
 
-              public function unserialize(array $data) : void {
+              public function __unserialize(array $data) : void {
                   $this->id = $data['id'];
                   $this->name = $data['name'];
                   $this->lastLogin = UserSystem::getLastLogin($this->id);
