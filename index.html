@@ -336,7 +336,7 @@
           $volumeWithX = fn(float $y, float $z): float => volume($x, $y, $z);
         </code></pre>
         <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
-          $volumeWithXY = fn(float $z) : float => $volumeWithX(4, $z);
+          $volumeWithXY = fn(float $z): float => $volumeWithX(4, $z);
         </code></pre>
         <pre class="fragment"><code class="php font--20" data-trim data-noescape data-line-numbers>
           $volumeForLength = fn(float $y): float => volume(5, $y, 8);
@@ -580,11 +580,11 @@
               protected string $name;
               protected DateTime $lastLogin;
 
-              public function serialize() : string {
+              public function serialize(): string {
                   return serialize(['id' => $this->id, 'name' => $this->name]);
               }
 
-              public function unserialize($serialized) : void {
+              public function unserialize($serialized): void {
                   $data = unserialize($serialized);
                   $this->id = $data['id'];
                   $this->name = $data['name'];
@@ -629,11 +629,11 @@
 
               // ...
 
-              public function __serialize() : array {
+              public function __serialize(): array {
                   return ['id' => $this->id, 'name' => $this->name];
               }
 
-              public function __unserialize(array $data) : void {
+              public function __unserialize(array $data): void {
                   $this->id = $data['id'];
                   $this->name = $data['name'];
                   $this->lastLogin = UserSystem::getLastLogin($this->id);
@@ -750,7 +750,7 @@
         <div class="layout-stacked" style="height: 650px">
           <h3>They all go splat</h3>
           <pre class="fragment"><code class="php font--24" data-trim data-noescape data-line-numbers>
-          function afunc(string $b, User ...$users) : callable
+          function afunc(string $b, User ...$users): callable
           {
               $params = [$a, $b, ...$users];
               anotherFunc(...$params);
