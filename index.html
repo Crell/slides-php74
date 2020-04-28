@@ -1330,8 +1330,28 @@
             <p class="oversize"><q>So when should I use it?</q></p>
             <p class="fragment oversize">Right now!</p>
           </div>
-          <p class="fragment"><a href="http://phpversions.info/new-and-shiny/">PHP Versions</a> lists 17 compatible hosts</p>
+          <p class="fragment"><a href="http://phpversions.info/new-and-shiny/">PHP Versions</a> lists 18 compatible hosts</p>
           <p class="fragment">(Yep, including <a href="https://platform.sh/">Platform.sh</a>)</p>
+        </div>
+      </section>
+      <section id="platformsh">
+        <h3>PHP 7.4 in 3 easy steps</h3>
+        <div class="layout-stacked" style="height:600px">
+          <div class="fragment">
+            <p><code>git checkout -b new-hotness</code></p>
+          </div>
+          <div class="fragment">
+            <code><code>nano .platform.app.yaml</code></code>
+            <pre><code class="diff font--18" data-trim data-noescape data-line-numbers>
+              - type: php:7.3
+              + type: php:7.4
+            </code></pre>
+            <p><code>git commit -am "New hotness" && git push</code></p>
+            <p><code>platform e:activate -y</code></p>
+          </div>
+          <div class="fragment">
+            <p><code>platform e:merge -y</code></p>
+          </div>
         </div>
       </section>
     </section>
@@ -1340,7 +1360,7 @@
       <h2>Larry Garfield</h2>
       <h2><a href="http://twitter.com/Crell">@Crell</a></h2>
       <p>Director of Developer Experience <a href="http://www.platform.sh/">Platform.sh</a></p>
-      <p>Idea to Cloud Hosting</p>
+      <p> The end-to-end web platform for agile teams</p>
       <p>Stalk us at <a href="http://twitter.com/Platformsh">@PlatformSH</a></p>
     </section>
 
